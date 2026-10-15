@@ -10,6 +10,11 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
 
+<!-- ★ 首屏关键图预加载（雪花 + 头像） -->
+<link rel="preload" as="image" href="images/xuehua1.webp" fetchpriority="high">
+<link rel="preload" as="image" href="images/xuehua2.webp" fetchpriority="high">
+<link rel="preload" as="image" href="images/tou.webp" fetchpriority="high">
+
 <style>
   *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
 
@@ -108,7 +113,7 @@
       radial-gradient(70% 24% at 22% 70%, rgba(204,213,228,0.86), rgba(204,213,228,0) 78%),
       radial-gradient(58% 20% at 86% 90%, rgba(246,248,251,0.94), rgba(246,248,251,0) 76%),
       radial-gradient(74% 26% at 50% 100%, rgba(192,203,220,0.78), rgba(192,203,220,0) 80%);
-    filter: blur(48px);
+    filter: blur(40px);
     transform: translateZ(0);
     transition: background 0.8s ease;
   }
@@ -135,7 +140,7 @@
     position: absolute;
     width: 64vh; height: 64vh;
     border-radius: 50%;
-    filter: blur(64px);
+    filter: blur(48px);
     opacity: 0.55;
     transition: background 0.8s ease;
   }
@@ -178,7 +183,6 @@
     opacity: 0;
     animation: fall var(--d, 30s) linear infinite;
     animation-delay: var(--dl, 0s);
-    will-change: transform, opacity;
   }
   .flakes span img {
     display: block;
@@ -188,8 +192,9 @@
     opacity: var(--o, 0.6);
     filter: drop-shadow(0 1px 3px rgba(150, 172, 202, 0.40));
     animation: sway var(--sw, 7s) ease-in-out infinite alternate;
-    will-change: transform;
     transition: filter 0.6s ease;
+    /* ★ 加 decoding 让解码异步，不阻塞渲染 */
+    decoding: async;
   }
 
   @keyframes fall {
@@ -322,9 +327,10 @@
       #eef0f4 0%, #e4e8ee 18%, #dce1e9 38%,
       #e4e8ef 56%, #d9dee7 76%, #e9ebf0 100%);
     cursor: pointer;
+    /* ★ 淡出时长由 1.1s/1.3s → 1.8s/2.0s，给后面的图更多加载时间 */
     transition:
-      opacity 1.1s cubic-bezier(0.4, 0, 0.2, 1),
-      transform 1.3s cubic-bezier(0.4, 0, 0.2, 1);
+      opacity 1.8s cubic-bezier(0.4, 0, 0.2, 1),
+      transform 2.0s cubic-bezier(0.4, 0, 0.2, 1);
     will-change: opacity, transform;
   }
   .splash::before {
@@ -702,6 +708,7 @@
     position: absolute;
     inset: 0;
     z-index: 0;
+    decoding: async;
   }
   .collage .profile-tag {
     flex: 1;
@@ -927,6 +934,7 @@
     position: absolute;
     inset: 0;
     z-index: 0;
+    decoding: async;
   }
   .taste-taboo { flex: 1; font-size: 12.5px; line-height: 2.2; }
 
@@ -985,6 +993,7 @@
     position: absolute;
     inset: 0;
     z-index: 0;
+    decoding: async;
   }
 
   .pola-cap {
@@ -1290,7 +1299,6 @@
       opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
       transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: var(--d, 0ms);
-    will-change: opacity, transform;
   }
   .reveal.in {
     opacity: 1;
@@ -1315,13 +1323,22 @@
       transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* ===== 移动端性能与亮度优化 + 页边距加宽 ===== */
+  /* ===== 移动端性能优化 ===== */
   @media (max-width: 480px) {
     .flakes span:nth-child(n+13) { display: none; }
     .flakes span img { filter: none; }
 
-    .bg::before { filter: blur(28px); }
-    .sheen::before, .sheen::after { filter: blur(44px); }
+    .bg::before { filter: blur(24px); }
+    .sheen::before, .sheen::after { filter: blur(38px); }
+
+    .theme-toggle {
+      -webkit-backdrop-filter: none;
+      backdrop-filter: none;
+      background: rgba(255, 255, 255, 0.78);
+    }
+    body.dark-mode .theme-toggle {
+      background: rgba(40, 48, 62, 0.82);
+    }
 
     .bg {
       background: linear-gradient(180deg,
@@ -1338,7 +1355,6 @@
     .playing-info .m3 { color: #8b939f; }
     .kicker { color: rgba(110, 122, 144, 0.85); }
 
-    /* 页边距加宽一点 */
     .stream { padding-left: 32px; padding-right: 32px; }
 
     .reveal {
@@ -1619,7 +1635,6 @@
 </head>
 <body class="locked">
 
-  <!-- 悬浮深色模式切换 -->
   <button class="theme-toggle" id="themeToggle" type="button" aria-label="切换深色模式">
     <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
          stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
@@ -1637,26 +1652,26 @@
   <div class="bg" aria-hidden="true"></div>
   <div class="sheen" aria-hidden="true"></div>
 
-  <!-- 雪花层 -->
+  <!-- 雪花层（★ 全部改 webp） -->
   <div class="flakes" id="flakesLayer" aria-hidden="true">
-    <span style="--x:3%;  --sz:24px; --d:26s; --dl:-4s;  --dx:14px; --sw:7.0s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:7%;  --sz:14px; --d:36s; --dl:-11s; --dx:8px;  --sw:5.6s; --o:.62"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:12%; --sz:13px; --d:34s; --dl:-16s; --dx:8px;  --sw:5.5s; --o:.65"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:17%; --sz:21px; --d:29s; --dl:-25s; --dx:13px; --sw:6.9s; --o:.48"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:22%; --sz:19px; --d:30s; --dl:-9s;  --dx:11px; --sw:6.2s; --o:.55"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:27%; --sz:12px; --d:32s; --dl:-23s; --dx:7px;  --sw:5.3s; --o:.66"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:32%; --sz:11px; --d:38s; --dl:-22s; --dx:6px;  --sw:5.0s; --o:.70"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:38%; --sz:22px; --d:27s; --dl:-2s;  --dx:13px; --sw:6.8s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:43%; --sz:15px; --d:35s; --dl:-14s; --dx:9px;  --sw:5.9s; --o:.58"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:49%; --sz:15px; --d:33s; --dl:-19s; --dx:9px;  --sw:6.0s; --o:.60"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:55%; --sz:26px; --d:25s; --dl:-12s; --dx:15px; --sw:7.4s; --o:.45"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:60%; --sz:12px; --d:37s; --dl:-27s; --dx:7px;  --sw:5.1s; --o:.68"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:65%; --sz:12px; --d:36s; --dl:-6s;  --dx:7px;  --sw:5.2s; --o:.68"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:71%; --sz:20px; --d:29s; --dl:-24s; --dx:12px; --sw:6.5s; --o:.55"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:76%; --sz:14px; --d:33s; --dl:-17s; --dx:8px;  --sw:5.7s; --o:.60"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:81%; --sz:14px; --d:32s; --dl:-14s; --dx:8px;  --sw:5.8s; --o:.62"><img src="images/xuehua2.png" alt=""></span>
-    <span style="--x:87%; --sz:23px; --d:28s; --dl:-8s;  --dx:14px; --sw:7.1s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
-    <span style="--x:94%; --sz:17px; --d:31s; --dl:-20s; --dx:10px; --sw:6.3s; --o:.58"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:3%;  --sz:24px; --d:26s; --dl:-4s;  --dx:14px; --sw:7.0s; --o:.50"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:7%;  --sz:14px; --d:36s; --dl:-11s; --dx:8px;  --sw:5.6s; --o:.62"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:12%; --sz:13px; --d:34s; --dl:-16s; --dx:8px;  --sw:5.5s; --o:.65"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:17%; --sz:21px; --d:29s; --dl:-25s; --dx:13px; --sw:6.9s; --o:.48"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:22%; --sz:19px; --d:30s; --dl:-9s;  --dx:11px; --sw:6.2s; --o:.55"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:27%; --sz:12px; --d:32s; --dl:-23s; --dx:7px;  --sw:5.3s; --o:.66"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:32%; --sz:11px; --d:38s; --dl:-22s; --dx:6px;  --sw:5.0s; --o:.70"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:38%; --sz:22px; --d:27s; --dl:-2s;  --dx:13px; --sw:6.8s; --o:.50"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:43%; --sz:15px; --d:35s; --dl:-14s; --dx:9px;  --sw:5.9s; --o:.58"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:49%; --sz:15px; --d:33s; --dl:-19s; --dx:9px;  --sw:6.0s; --o:.60"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:55%; --sz:26px; --d:25s; --dl:-12s; --dx:15px; --sw:7.4s; --o:.45"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:60%; --sz:12px; --d:37s; --dl:-27s; --dx:7px;  --sw:5.1s; --o:.68"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:65%; --sz:12px; --d:36s; --dl:-6s;  --dx:7px;  --sw:5.2s; --o:.68"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:71%; --sz:20px; --d:29s; --dl:-24s; --dx:12px; --sw:6.5s; --o:.55"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:76%; --sz:14px; --d:33s; --dl:-17s; --dx:8px;  --sw:5.7s; --o:.60"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:81%; --sz:14px; --d:32s; --dl:-14s; --dx:8px;  --sw:5.8s; --o:.62"><img src="images/xuehua2.webp" alt=""></span>
+    <span style="--x:87%; --sz:23px; --d:28s; --dl:-8s;  --dx:14px; --sw:7.1s; --o:.50"><img src="images/xuehua1.webp" alt=""></span>
+    <span style="--x:94%; --sz:17px; --d:31s; --dl:-20s; --dx:10px; --sw:6.3s; --o:.58"><img src="images/xuehua2.webp" alt=""></span>
   </div>
 
   <div class="splash" id="splash" role="button" tabindex="0" aria-label="点击进入">
@@ -1721,7 +1736,8 @@
       <div class="collage reveal" id="anchor-profile" style="--fx:-18px; --d:80ms;">
         <figure class="tou-piece">
           <div class="photo">
-            <img src="images/tou.jpg" alt="tu1" />
+            <!-- ★ tou.webp，首屏图不 lazy -->
+            <img src="images/tou.webp" alt="tu1" decoding="async" />
             <span class="grade"></span>
           </div>
         </figure>
@@ -1790,7 +1806,7 @@
         </div>
       </div>
 
-      <audio id="bgAudio" preload="none" loop>
+      <audio id="bgAudio" preload="metadata" loop playsinline>
         <source src="https://music.163.com/song/media/outer/url?id=2093433056.mp3" type="audio/mpeg">
       </audio>
 
@@ -1885,7 +1901,7 @@
 
           <figure class="pola-card pola-card--a">
             <div class="pola-photo photo">
-              <img src="images/tu2.jpg" alt="tu2" />
+              <img src="images/tu2.webp" decoding="async" alt="tu2" />
               <span class="grade"></span>
             </div>
             <figcaption class="pola-cap">
@@ -1896,7 +1912,7 @@
 
           <figure class="pola-card pola-card--b">
             <div class="pola-photo photo">
-              <img src="images/tu3.jpg" alt="tu3" />
+              <img src="images/tu3.webp" decoding="async" alt="tu3" />
               <span class="grade"></span>
             </div>
             <figcaption class="pola-cap">
@@ -1935,7 +1951,7 @@
       <div class="taste-block reveal" style="--fx:-20px; --d:90ms;">
         <figure class="taste-photo">
           <div class="photo">
-            <img src="images/tu4.jpg" alt="tu4" />
+            <img src="images/tu4.webp" decoding="async" alt="tu4" />
             <span class="grade"></span>
           </div>
         </figure>
@@ -1979,13 +1995,33 @@
 (function () {
   'use strict';
 
+  /* ★ 一开始就静默预加载剩余的图（tou / tu2 / tu3 / tu4），
+     让它们趁开屏时间在后台加载完 */
+  (function preloadRest(){
+    var rest = [
+      'images/tou.webp',
+      'images/tu2.webp',
+      'images/tu3.webp',
+      'images/tu4.webp'
+    ];
+    // 用 requestIdleCallback 让首屏资源先走
+    var cb = window.requestIdleCallback || function(fn){ setTimeout(fn, 300); };
+    cb(function(){
+      rest.forEach(function(src){
+        var img = new Image();
+        img.decoding = 'async';
+        img.src = src;
+      });
+    });
+  })();
+
   function haptic(ms) {
     if (navigator.vibrate) {
       try { navigator.vibrate(ms || 10); } catch (e) {}
     }
   }
 
-  /* ===== 深色模式切换（默认浅色） ===== */
+  /* ===== 深色模式切换 ===== */
   (function () {
     var toggle = document.getElementById('themeToggle');
     if (!toggle) return;
@@ -2066,7 +2102,7 @@
     grid.innerHTML = html;
   })();
 
-  /* 音乐播放 */
+  /* 音乐 */
   var audio = document.getElementById('bgAudio');
   var miniPlay = document.getElementById('miniPlay');
   var discEl = document.querySelector('.disc');
@@ -2181,8 +2217,9 @@
       splash.classList.add('dismissed');
       document.body.classList.add('ready');
       document.body.classList.remove('locked');
-      setTimeout(function () { splash.style.display = 'none'; }, 1400);
-      setTimeout(startReveal, 200);
+      // ★ 与 CSS 里的 1.8/2.0s 过渡保持一致
+      setTimeout(function () { splash.style.display = 'none'; }, 2100);
+      setTimeout(startReveal, 400);
     }
 
     function isMusicBtn(target) {
@@ -2257,7 +2294,7 @@
     updateActive();
   })();
 
-  /* 顶部滚动进度 */
+  /* 滚动进度 */
   (function () {
     var bar = document.getElementById('scrollProgress');
     if (!bar) return;
@@ -2299,7 +2336,7 @@
     update();
   })();
 
-  /* 拍立得相册 */
+  /* 拍立得 */
   (function () {
     var stage = document.getElementById('polaStage');
     if (!stage) return;
