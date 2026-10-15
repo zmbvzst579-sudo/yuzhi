@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
 <meta charset="UTF-8" />
@@ -9,11 +9,6 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=Noto+Serif+SC:wght@200;300;400;500&display=swap" rel="stylesheet">
-
-<!-- ★ 首屏关键图预加载（雪花 + 头像） -->
-<link rel="preload" as="image" href="images/xuehua1.webp">
-<link rel="preload" as="image" href="images/xuehua2.webp">
-<link rel="preload" as="image" href="images/tou.webp">
 
 <style>
   *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
@@ -113,7 +108,7 @@
       radial-gradient(70% 24% at 22% 70%, rgba(204,213,228,0.86), rgba(204,213,228,0) 78%),
       radial-gradient(58% 20% at 86% 90%, rgba(246,248,251,0.94), rgba(246,248,251,0) 76%),
       radial-gradient(74% 26% at 50% 100%, rgba(192,203,220,0.78), rgba(192,203,220,0) 80%);
-    filter: blur(36px);                /* ★ 48px → 36px */
+    filter: blur(48px);
     transform: translateZ(0);
     transition: background 0.8s ease;
   }
@@ -140,7 +135,7 @@
     position: absolute;
     width: 64vh; height: 64vh;
     border-radius: 50%;
-    filter: blur(46px);                /* ★ 64px → 46px */
+    filter: blur(64px);
     opacity: 0.55;
     transition: background 0.8s ease;
   }
@@ -171,7 +166,7 @@
     pointer-events: none;
     overflow: hidden;
     transition: transform 0.15s ease-out;
-    will-change: transform;             /* ★ 保留 —— JS 会改它的 transform */
+    will-change: transform;
   }
   .flakes span {
     position: absolute;
@@ -183,7 +178,7 @@
     opacity: 0;
     animation: fall var(--d, 30s) linear infinite;
     animation-delay: var(--dl, 0s);
-    /* ★ 删除 will-change:transform,opacity —— 18 个元素每个都提升图层太吃显存 */
+    will-change: transform, opacity;
   }
   .flakes span img {
     display: block;
@@ -193,7 +188,7 @@
     opacity: var(--o, 0.6);
     filter: drop-shadow(0 1px 3px rgba(150, 172, 202, 0.40));
     animation: sway var(--sw, 7s) ease-in-out infinite alternate;
-    /* ★ 删除 will-change:transform */
+    will-change: transform;
     transition: filter 0.6s ease;
   }
 
@@ -604,20 +599,6 @@
     position: relative;
   }
 
-  .vertical-note {
-    position: absolute;
-    right: 4px;
-    top: 300px;
-    writing-mode: vertical-rl;
-    text-orientation: upright;
-    font-size: 10px;
-    font-weight: 300;
-    letter-spacing: 0.5em;
-    color: rgba(140, 156, 182, 0.42);
-    pointer-events: none;
-    user-select: none;
-  }
-
   .body,
   .verse p,
   .taboo,
@@ -787,18 +768,6 @@
     background: radial-gradient(120% 100% at 50% 45%,
       rgba(255, 255, 255, 0) 55%,
       rgba(40, 60, 90, 0.16) 100%);
-  }
-  .img-tag {
-    position: absolute;
-    bottom: 5px; right: 7px;
-    font-size: 9px;
-    letter-spacing: 0.2em;
-    color: rgba(255, 255, 255, 0.92);
-    text-shadow: 0 1px 4px rgba(30, 50, 80, 0.7);
-    z-index: 5;
-    font-weight: 300;
-    font-family: "Cormorant Garamond", serif;
-    pointer-events: none;
   }
 
   .verse { text-align: center; padding: 0 8px; }
@@ -1321,7 +1290,7 @@
       opacity 1.05s cubic-bezier(0.22, 1, 0.36, 1),
       transform 1.15s cubic-bezier(0.22, 1, 0.36, 1);
     transition-delay: var(--d, 0ms);
-    /* ★ 删除了 will-change:opacity,transform —— .reveal 元素太多（页面 20+ 处） */
+    will-change: opacity, transform;
   }
   .reveal.in {
     opacity: 1;
@@ -1346,13 +1315,13 @@
       transform 0.8s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
-  /* ===== 移动端性能与亮度优化 ===== */
+  /* ===== 移动端性能与亮度优化 + 页边距加宽 ===== */
   @media (max-width: 480px) {
     .flakes span:nth-child(n+13) { display: none; }
     .flakes span img { filter: none; }
 
-    .bg::before { filter: blur(24px); }       /* ★ 28px → 24px */
-    .sheen::before, .sheen::after { filter: blur(38px); }  /* ★ 44px → 38px */
+    .bg::before { filter: blur(28px); }
+    .sheen::before, .sheen::after { filter: blur(44px); }
 
     .bg {
       background: linear-gradient(180deg,
@@ -1368,6 +1337,9 @@
     .pref-top { color: #59626e; }
     .playing-info .m3 { color: #8b939f; }
     .kicker { color: rgba(110, 122, 144, 0.85); }
+
+    /* 页边距加宽一点 */
+    .stream { padding-left: 32px; padding-right: 32px; }
 
     .reveal {
       transition:
@@ -1388,7 +1360,7 @@
   }
 
   @media (max-width: 360px) {
-    .stream { padding-left: 20px; padding-right: 20px; }
+    .stream { padding-left: 26px; padding-right: 26px; }
     .tou-piece { width: 76px; }
     .collage { gap: 18px; }
     .taste-photo { width: 84px; }
@@ -1620,7 +1592,6 @@
   body.dark-mode .orn-dots i { background: rgba(130, 150, 180, 0.42); }
   body.dark-mode .orn-dots i:nth-child(2) { background: rgba(130, 150, 180, 0.60); }
   body.dark-mode .foot { color: #5f6876; }
-  body.dark-mode .vertical-note { color: rgba(130, 150, 180, 0.40); }
 
   body.dark-mode .flakes span img {
     filter: drop-shadow(0 1px 3px rgba(60, 90, 140, 0.45));
@@ -1666,26 +1637,26 @@
   <div class="bg" aria-hidden="true"></div>
   <div class="sheen" aria-hidden="true"></div>
 
-  <!-- 雪花层（★ 全部改 .webp） -->
+  <!-- 雪花层 -->
   <div class="flakes" id="flakesLayer" aria-hidden="true">
-    <span style="--x:3%;  --sz:24px; --d:26s; --dl:-4s;  --dx:14px; --sw:7.0s; --o:.50"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:7%;  --sz:14px; --d:36s; --dl:-11s; --dx:8px;  --sw:5.6s; --o:.62"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:12%; --sz:13px; --d:34s; --dl:-16s; --dx:8px;  --sw:5.5s; --o:.65"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:17%; --sz:21px; --d:29s; --dl:-25s; --dx:13px; --sw:6.9s; --o:.48"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:22%; --sz:19px; --d:30s; --dl:-9s;  --dx:11px; --sw:6.2s; --o:.55"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:27%; --sz:12px; --d:32s; --dl:-23s; --dx:7px;  --sw:5.3s; --o:.66"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:32%; --sz:11px; --d:38s; --dl:-22s; --dx:6px;  --sw:5.0s; --o:.70"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:38%; --sz:22px; --d:27s; --dl:-2s;  --dx:13px; --sw:6.8s; --o:.50"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:43%; --sz:15px; --d:35s; --dl:-14s; --dx:9px;  --sw:5.9s; --o:.58"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:49%; --sz:15px; --d:33s; --dl:-19s; --dx:9px;  --sw:6.0s; --o:.60"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:55%; --sz:26px; --d:25s; --dl:-12s; --dx:15px; --sw:7.4s; --o:.45"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:60%; --sz:12px; --d:37s; --dl:-27s; --dx:7px;  --sw:5.1s; --o:.68"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:65%; --sz:12px; --d:36s; --dl:-6s;  --dx:7px;  --sw:5.2s; --o:.68"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:71%; --sz:20px; --d:29s; --dl:-24s; --dx:12px; --sw:6.5s; --o:.55"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:76%; --sz:14px; --d:33s; --dl:-17s; --dx:8px;  --sw:5.7s; --o:.60"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:81%; --sz:14px; --d:32s; --dl:-14s; --dx:8px;  --sw:5.8s; --o:.62"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
-    <span style="--x:87%; --sz:23px; --d:28s; --dl:-8s;  --dx:14px; --sw:7.1s; --o:.50"><img src="images/xuehua1.webp" alt="" decoding="async"></span>
-    <span style="--x:94%; --sz:17px; --d:31s; --dl:-20s; --dx:10px; --sw:6.3s; --o:.58"><img src="images/xuehua2.webp" alt="" decoding="async"></span>
+    <span style="--x:3%;  --sz:24px; --d:26s; --dl:-4s;  --dx:14px; --sw:7.0s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:7%;  --sz:14px; --d:36s; --dl:-11s; --dx:8px;  --sw:5.6s; --o:.62"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:12%; --sz:13px; --d:34s; --dl:-16s; --dx:8px;  --sw:5.5s; --o:.65"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:17%; --sz:21px; --d:29s; --dl:-25s; --dx:13px; --sw:6.9s; --o:.48"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:22%; --sz:19px; --d:30s; --dl:-9s;  --dx:11px; --sw:6.2s; --o:.55"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:27%; --sz:12px; --d:32s; --dl:-23s; --dx:7px;  --sw:5.3s; --o:.66"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:32%; --sz:11px; --d:38s; --dl:-22s; --dx:6px;  --sw:5.0s; --o:.70"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:38%; --sz:22px; --d:27s; --dl:-2s;  --dx:13px; --sw:6.8s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:43%; --sz:15px; --d:35s; --dl:-14s; --dx:9px;  --sw:5.9s; --o:.58"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:49%; --sz:15px; --d:33s; --dl:-19s; --dx:9px;  --sw:6.0s; --o:.60"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:55%; --sz:26px; --d:25s; --dl:-12s; --dx:15px; --sw:7.4s; --o:.45"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:60%; --sz:12px; --d:37s; --dl:-27s; --dx:7px;  --sw:5.1s; --o:.68"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:65%; --sz:12px; --d:36s; --dl:-6s;  --dx:7px;  --sw:5.2s; --o:.68"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:71%; --sz:20px; --d:29s; --dl:-24s; --dx:12px; --sw:6.5s; --o:.55"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:76%; --sz:14px; --d:33s; --dl:-17s; --dx:8px;  --sw:5.7s; --o:.60"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:81%; --sz:14px; --d:32s; --dl:-14s; --dx:8px;  --sw:5.8s; --o:.62"><img src="images/xuehua2.png" alt=""></span>
+    <span style="--x:87%; --sz:23px; --d:28s; --dl:-8s;  --dx:14px; --sw:7.1s; --o:.50"><img src="images/xuehua1.png" alt=""></span>
+    <span style="--x:94%; --sz:17px; --d:31s; --dl:-20s; --dx:10px; --sw:6.3s; --o:.58"><img src="images/xuehua2.png" alt=""></span>
   </div>
 
   <div class="splash" id="splash" role="button" tabindex="0" aria-label="点击进入">
@@ -1732,7 +1703,7 @@
     <button type="button" class="flake-btn" data-target="anchor-profile" data-label="冻雨 · 与之" aria-label="冻雨 / 与之">❅</button>
     <button type="button" class="flake-btn" data-target="anchor-pref"    data-label="我的偏好"     aria-label="我的偏好">❆</button>
     <button type="button" class="flake-btn" data-target="anchor-notice"  data-label="相处须知"     aria-label="相处须知">❋</button>
-    <button type="button" class="flake-btn" data-target="anchor-xilei"   data-label="喜雷"         aria-label="喜雷">✳</button>
+    <button type="button" class="flake-btn" data-target="anchor-xilei"   data-label="喜雷"         aria-label="喜雷">❉</button>
   </nav>
 
   <div class="mist" aria-hidden="true"></div>
@@ -1742,8 +1713,6 @@
   <div class="paper">
     <main class="stream">
 
-      <span class="vertical-note" aria-hidden="true">绒雨 未停</span>
-
       <section class="prologue reveal" style="--fx:-16px; --r:-0.22deg; --d:0ms">
         <p class="kicker">Pluie · Écouteurs · Neige</p>
         <p class="body fade-chars"><span>我</span><span>叹</span><span>缘</span><span>分</span><span>浅</span><span>浅</span><span>如</span><span>雨</span><span>渐</span><span>渐</span></p>
@@ -1752,10 +1721,8 @@
       <div class="collage reveal" id="anchor-profile" style="--fx:-18px; --d:80ms;">
         <figure class="tou-piece">
           <div class="photo">
-            <!-- ★ 首屏头像：不加 lazy，立即加载 -->
-            <img src="images/tou.webp" alt="tu1" decoding="async" />
+            <img src="images/tou.jpg" alt="tu1" />
             <span class="grade"></span>
-            <span class="img-tag">tu1</span>
           </div>
         </figure>
         <p class="profile-tag">
@@ -1764,7 +1731,7 @@
         </p>
       </div>
 
-      <div class="verse reveal" style="--fx:0px; --r:0.15deg; --d:110ms; margin-top: 88px;">
+      <div class="verse reveal" style="--fx:0px; --r:0.15deg; --d:110ms; margin-top: 66px;">
         <p>
           有时我也想问，天地霏雨<br>
           人与人 藕断丝连<br>
@@ -1773,9 +1740,9 @@
         <span class="vs">❋</span>
       </div>
 
-      <div class="hr left reveal" style="--fx:-16px; --d:60ms; margin-top: 88px;"><span>❧</span></div>
+      <div class="hr left reveal" style="--fx:-16px; --d:60ms; margin-top: 68px;"><span>❧</span></div>
 
-      <div class="playing reveal" style="--fx:-22px; --r:-0.2deg; --d:90ms; margin-top: 24px;">
+      <div class="playing reveal" style="--fx:-22px; --r:-0.2deg; --d:90ms; margin-top: 16px;">
         <div class="disc-wrap" id="discBtn" aria-hidden="true">
           <div class="disc"></div>
         </div>
@@ -1918,9 +1885,8 @@
 
           <figure class="pola-card pola-card--a">
             <div class="pola-photo photo">
-              <img src="images/tu2.webp" loading="lazy" decoding="async" alt="tu2" />
+              <img src="images/tu2.jpg" alt="tu2" />
               <span class="grade"></span>
-              <span class="img-tag">tu2</span>
             </div>
             <figcaption class="pola-cap">
               <span class="cap-main">Écoute la pluie</span>
@@ -1930,9 +1896,8 @@
 
           <figure class="pola-card pola-card--b">
             <div class="pola-photo photo">
-              <img src="images/tu3.webp" loading="lazy" decoding="async" alt="tu3" />
+              <img src="images/tu3.jpg" alt="tu3" />
               <span class="grade"></span>
-              <span class="img-tag">tu3</span>
             </div>
             <figcaption class="pola-cap">
               <span class="cap-main">Encore une fois</span>
@@ -1970,9 +1935,8 @@
       <div class="taste-block reveal" style="--fx:-20px; --d:90ms;">
         <figure class="taste-photo">
           <div class="photo">
-            <img src="images/tu4.webp" loading="lazy" decoding="async" alt="tu4" />
+            <img src="images/tu4.jpg" alt="tu4" />
             <span class="grade"></span>
-            <span class="img-tag">tu4</span>
           </div>
         </figure>
         <p class="taboo taste-taboo">
